@@ -13,7 +13,7 @@ ap.add_argument("-i", "--image", required=True,
 ap.add_argument("-o", "--output", required=True,
 	help="path to output directory to store augmentation examples")
 ap.add_argument("-n", "--name", required=True,
-	help="name files to output directory")
+	help="name to output files")
 ap.add_argument("-t", "--total", type=int, default=3,
 	help="# of training samples to generate")
 args = vars(ap.parse_args())
@@ -38,7 +38,8 @@ def generator(image, name):
 	    image,
 	    batch_size=1,
 	    save_to_dir=args["output"],
-		save_prefix=os.path.splitext(name)[0], save_format="jpg")
+		save_prefix=os.path.splitext(name)[0],
+		save_format="jpg")
 
 		# loop over examples from our image data augmentation generator
 	for image in imageGen:
@@ -47,25 +48,35 @@ def generator(image, name):
 		# if we have reached the specified number of examples, break
 		# from the loop
 		if total == args["total"]:
-			print("[INFO] generating %d images..." % args["total"])
 			break
 
-# load the input image, convert it to a NumPy array, and then
-# reshape it to have an extra dimension
-print("[INFO] loading example image...")
-'''image = load_img(args["image"])
-image = img_to_array(image)
-image = np.expand_dims(image, axis=0)'''
+def rename():
+	i = 0
+	for filename in os.listdir(args["output"]):
+		dst = args["name"] + str(i) + ".jpg"
+		src = args["output"] + filename
+		dst = args["output"] + dst
+		os.rename(src, dst)
+		i += 1
+	print('[INFO] Rename %d images...' % i)
 
-path = args["image"]
-print('[INFO] Path to images: ', path)
-fds = sorted(os.listdir(path))
-print('[INFO] Sorted images: ', fds)
-for img in fds:
-	i = str(path) + str(img)
-	print('[INFO] image: ', i)
-	image = load_img(i)
-	image = img_to_array(image)
-	image = np.expand_dims(image, axis = 0)
-	name = args["name"]
-	generator(image, name)
+if __name__ == '__main__':
+	# load the input image, convert it to a NumPy array, and then
+	# reshape it to have an extra dimension
+	print("[INFO] loading example image...")
+
+	path = args["image"]
+	print('[INFO] Path to images: ', path)
+	fds = sorted(os.listdir(path))
+	print('[INFO] Sorted images: ', fds)
+	for img in fds:
+		i = str(path) + str(img)
+		print('[INFO] image: ', i)
+		image = load_img(i)
+		image = img_to_array(image)
+		image = np.expand_dims(image, axis = 0)
+		name = args["name"]
+		generator(image, name)
+
+	# rename images in output create_directory
+	rename()
